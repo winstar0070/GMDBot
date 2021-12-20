@@ -1,17 +1,41 @@
-from nextcord.ext import commands
+from discord.ext import commands
 import json
-import Functions
+from wrapper import fetch_meal
+import datetime
 
-with open('config.json', 'r') as f: # config 변수 안에 config.json 불러오기
-    config = json.load(f)
 
-bot = commands.Bot(command_prefix='$') 
+bot = commands.Bot(command_prefix="")
+
+
+def __calc_datetime(target: str) -> str:
+    if target in ["어제", "오늘", "내일"]:
+
+        if target == "어제":
+            date = datetime.datetime.now() + datetime.timedelta(days=-1)
+            return date.strftime("%Y%m%d")
+
+        if target == "오늘":
+            return datetime.datetime.now().strftime("%Y%m%d")
+
+        if target == "내일":
+            date = datetime.datetime.now() + datetime.timedelta(days=1)
+            return date.strftime("%Y%m%d")
+
+    return target  # YYYYMMDD 꼴
+
 
 @bot.event
-async def on_message(message):
-    if message.content == "급식":
-        await message.reply(Functions.getTodayMeal())
-    if "급식" in message.content and "내일" in message.content :
-        await message.reply(Functions.getTomorrowMeal())
+async def on_ready():
+    print(f"Bot Ready. - {bot.user.name}")
 
-bot.run(config['token'])
+
+@bot.command(name="급식")
+async def meal(ctx, args: str = "오늘"):
+    await ctx.reply(fetch_meal(__calc_datetime(args)))
+
+
+if __name__ == "__main__":
+    with open("config.json", "r") as f:  # config 변수 안에 config.json 불러오기
+        config = json.load(f)
+
+    bot.run(config["token"])
