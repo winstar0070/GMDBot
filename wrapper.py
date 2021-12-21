@@ -1,4 +1,5 @@
 from aiohttp import ClientSession
+from discord import Embed
 
 
 async def fetch_meal(date: str):
@@ -8,18 +9,14 @@ async def fetch_meal(date: str):
         async with session.get(url) as resp:
             school_menu = await resp.json(encoding="utf-8")
 
+    embed = Embed()
+
     try:
-        code = school_menu[0]["code"][1]
-        calorie = school_menu[0]["calorie"]
-        meal_message = f"{date}의 {code}은 놀랍게도 {calorie} 이에요! \n\n"
+        embed.title = f"{date}의 {school_menu[0]['code'][1]}은 놀랍게도 {school_menu[0]['calorie']} 이에요!"
+        meal_message = ""
 
         for meal in school_menu[0]["menu"]:  # 향상된 for문
-            allergy_all = ""
-            meal_message += str(meal["name"])
-            meal_message += " "
-
-            # print(school_menu[0]['menu'][i]['allergy'])
-
+            meal_message += f"{str(meal['name'])} "
             allergy_all = ", ".join(meal["allergy"])  # 각 메뉴당 알러지 정보 추가.
 
             if not allergy_all == "":
@@ -27,15 +24,14 @@ async def fetch_meal(date: str):
 
             meal_message += "\n"  # 그리고 \n (Enter)
 
-        # print(meal_message)
-        meal_message = meal_message.replace("**", "*")  # MarkDown 때문에 이상하게 됨.
+        embed.description = meal_message.replace("**", "*")  # MarkDown 때문에 이상하게 됨.
 
     except:
 
         if (school_menu["message"]) == "급식 정보가 없습니다":
-            meal_message = "오늘은 급식이 없어요!"
+            embed.title = "오늘은 급식이 없어요!"
 
         else:
-            meal_message = "알 수 없는 오류가 발생했어요!"
+            embed.title = "알 수 없는 오류가 발생했어요!"
 
-    return meal_message
+    return embed

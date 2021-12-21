@@ -38,7 +38,7 @@ async def on_command_error(context, exception):
 @bot.command(name="급식")
 async def meal(ctx, args: str = "오늘"):
     meals = await fetch_meal(__calc_datetime(args))
-    await ctx.reply(meals)
+    await ctx.reply(embed=meals)
 
 
 if __name__ == "__main__":
