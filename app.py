@@ -29,9 +29,16 @@ async def on_ready():
     print(f"Bot Ready. - {bot.user.name}")
 
 
+@bot.event
+async def on_command_error(context, exception):
+    if isinstance(exception, commands.CommandNotFound):
+        return
+
+
 @bot.command(name="급식")
 async def meal(ctx, args: str = "오늘"):
-    await ctx.reply(fetch_meal(__calc_datetime(args)))
+    meals = await fetch_meal(__calc_datetime(args))
+    await ctx.reply(meals)
 
 
 if __name__ == "__main__":
